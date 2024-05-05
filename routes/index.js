@@ -21,6 +21,18 @@ router.get("/api/category/:User_ID", async (req, res) => {
   }
 });
 
+router.get("/api/transaction/:User_ID", async (req, res) => {
+  try {
+    const transactions = await req.db
+      .from("transaction")
+      .select("ID",  "amount", "note", "user_id", "date", "category")
+      .where("user_id", req.params.User_ID);
+    res.json({ error: false, transactions });
+  } catch (error) {
+    res.json({ error: true, message: error });
+  }
+});
+
 
 router.post('/api/category/create', async (req, res) => {
   try {
@@ -65,6 +77,17 @@ router.delete("/api/category/delete/:Category_ID", async (req, res) => {
 
   try {
     await req.db('category').where('id', req.params.Category_ID).del();
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Error updating category name:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete("/api/transaction/delete/:Transaction_ID", async (req, res) => {
+
+  try {
+    await req.db('transaction').where('id', req.params.Transaction_ID).del();
     res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Error updating category name:', error);
