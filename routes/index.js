@@ -1,17 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const bodyParser = require('body-parser');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.use(bodyParser.json());
 
 router.get("/api/category/:User_ID", async (req, res) => {
   try {
     const categories = await req.db
       .from("category")
-      .select("name")
+      .select("ID", "name")
       .where("user_id", req.params.User_ID);
     res.json({ error: false, categories });
   } catch (error) {
@@ -19,17 +21,19 @@ router.get("/api/category/:User_ID", async (req, res) => {
   }
 });
 
-router.get("/api/city/:CountryCode", async (req, res) => {
+
+// 处理POST请求
+router.post('/api/category/create', async (req, res) => {
   try {
-    const [cities] = await req.db.query(
-      "SELECT name, district FROM city WHERE CountryCode = ? ",
-      [req.params.CountryCode]
-    );
-    res.json({ error: false, cities });
+    const { name, user_id } = req.body;
+    await req.db.insert({ name, user_id }).into('category');;
+    res.status(201).json({ message: 'Data inserted successfully' });
   } catch (error) {
-    res.json({ error: true, message: error });
+    console.error('Error inserting data:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 

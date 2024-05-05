@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const fs = require("fs");
+const bodyParser = require('body-parser');
 
 const swaggerUI = require("swagger-ui-express");
 const swaggerDocument = require("./docs/openapi.json");
@@ -22,6 +23,8 @@ const usersRouter = require('./routes/users');
 const app = express();
 
 app.use(logger("common", { stream: logStream }));
+
+app.use(bodyParser.json());
 
 app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
