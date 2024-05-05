@@ -22,7 +22,6 @@ router.get("/api/category/:User_ID", async (req, res) => {
 });
 
 
-// 处理POST请求
 router.post('/api/category/create', async (req, res) => {
   try {
     const { name, user_id } = req.body;
@@ -34,6 +33,33 @@ router.post('/api/category/create', async (req, res) => {
   }
 });
 
+router.put('/api/category/modify/:Category_ID', async (req, res) => {
+
+  const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
+    if (!existingCategory) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+  try {
+    const { name } = req.body;
+    await req.db('category').where('id', req.params.Category_ID).update({name});
+    res.status(200).json({ message: 'Category name updated successfully' });
+  } catch (error) {
+    console.error('Error updating category name:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete("/api/category/delete/:Category_ID", async (req, res) => {
+
+  try {
+    await req.db('category').where('id', req.params.Category_ID).del();
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Error updating category name:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 
