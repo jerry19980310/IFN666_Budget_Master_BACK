@@ -33,6 +33,17 @@ router.post('/api/category/create', async (req, res) => {
   }
 });
 
+router.post('/api/transaction/create', async (req, res) => {
+  try {
+    const { amount, note, user_id, date, category } = req.body;
+    await req.db.insert({ amount, note, user_id, date, category }).into('transaction');;
+    res.status(201).json({ message: 'Data inserted successfully' });
+  } catch (error) {
+    console.error('Error inserting data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.put('/api/category/modify/:Category_ID', async (req, res) => {
 
   const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
