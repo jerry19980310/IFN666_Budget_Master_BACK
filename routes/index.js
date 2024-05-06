@@ -73,6 +73,23 @@ router.put('/api/category/modify/:Category_ID', async (req, res) => {
   }
 });
 
+router.put('/api/transaction/modify/:Transaction_ID', async (req, res) => {
+
+  const existingTransaction = await req.db('transaction').where('id', req.params.Transaction_ID).first();
+    if (!existingTransaction) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+  try {
+    const { amount, note, date, category } = req.body;
+    await req.db('transaction').where('id', req.params.Transaction_ID).update({amount, note, date, category});
+    res.status(200).json({ message: 'Transaction updated successfully' });
+  } catch (error) {
+    console.error('Error updating transaction:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.delete("/api/category/delete/:Category_ID", async (req, res) => {
 
   try {
