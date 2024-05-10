@@ -1,6 +1,39 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
+
+const secretKey = process.env.JWT_SECRET;
+const jwt = require('jsonwebtoken');
+
+const authorize = (req, res, next) => {
+    const authorization = req.headers.authorization;
+    let token = null;
+    // Retrieve token
+    if (authorization && authorization.split(" ").length === 2) {
+        token = authorization.split(" ")[1];
+        console.log("Token: ", token);
+    } else {
+        console.log("Unauthorized user");
+        res.status(401).json({error: true, message: "Unauthorized"})
+        return;
+    }
+    // Verify JWT and check expiration date
+    try {
+        const decoded = jwt.verify(token, secretKey);
+        if (decoded.exp < Date.now) {
+        console.log("Token has expired");
+        return;
+        }
+        // Permit user to advance to route
+        next();
+    } catch (e) {
+        console.log("Invalid token");
+        res.status(401).json({error: true, message: "Unauthorized"})
+        return;
+    }
+    
+};
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -34,7 +67,7 @@ router.get("/api/transaction/:User_ID", async (req, res) => {
 });
 
 
-router.post('/api/category/create', async (req, res) => {
+router.post('/api/category/create', authorize, async (req, res) => {
   try {
     const { name, user_id } = req.body;
     await req.db.insert({ name, user_id }).into('category');;
@@ -45,7 +78,7 @@ router.post('/api/category/create', async (req, res) => {
   }
 });
 
-router.post('/api/transaction/create', async (req, res) => {
+router.post('/api/transaction/create', authorize, async (req, res) => {
   try {
     const { amount, note, user_id, date, category } = req.body;
     await req.db.insert({ amount, note, user_id, date, category }).into('transaction');;
@@ -56,7 +89,7 @@ router.post('/api/transaction/create', async (req, res) => {
   }
 });
 
-router.put('/api/category/modify/:Category_ID', async (req, res) => {
+router.put('/api/category/modify/:Category_ID', authorize, async (req, res) => {
 
   const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
     if (!existingCategory) {
@@ -73,7 +106,7 @@ router.put('/api/category/modify/:Category_ID', async (req, res) => {
   }
 });
 
-router.put('/api/transaction/modify/:Transaction_ID', async (req, res) => {
+router.put('/api/transaction/modify/:Transaction_ID', authorize, async (req, res) => {
 
   const existingTransaction = await req.db('transaction').where('id', req.params.Transaction_ID).first();
     if (!existingTransaction) {
@@ -90,7 +123,7 @@ router.put('/api/transaction/modify/:Transaction_ID', async (req, res) => {
   }
 });
 
-router.delete("/api/category/delete/:Category_ID", async (req, res) => {
+router.delete("/api/category/delete/:Category_ID", authorize, async (req, res) => {
 
   try {
     await req.db('category').where('id', req.params.Category_ID).del();
@@ -101,7 +134,7 @@ router.delete("/api/category/delete/:Category_ID", async (req, res) => {
   }
 });
 
-router.delete("/api/transaction/delete/:Transaction_ID", async (req, res) => {
+router.delete("/api/transaction/delete/:Transaction_ID", authorize, async (req, res) => {
 
   try {
     await req.db('transaction').where('id', req.params.Transaction_ID).del();
@@ -111,7 +144,5 @@ router.delete("/api/transaction/delete/:Transaction_ID", async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 
 module.exports = router;
