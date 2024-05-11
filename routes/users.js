@@ -25,7 +25,9 @@ router.post("/register",  async (req, res) => {
   const existingUser = await req.db('user').where('username', username).first();
 
   if (existingUser) {
-    return res.status(409).json({ error: 'User already exists' });
+    return res.status(409).json({ 
+      error: true,
+      message: 'User already exists' });
   }
 
   const hash = bcrypt.hashSync(password, saltRounds)
@@ -35,7 +37,9 @@ router.post("/register",  async (req, res) => {
     res.status(201).json({ success: true, message: "User created" });
   } catch (error) {
     console.error('Error inserting user:', error);
-    res.status(500).json({ error: 'Error creating user' });
+    res.status(500).json({ 
+      error: true,
+      message: 'Error creating user' });
   }
 
 });
@@ -65,7 +69,7 @@ router.post("/login",  async (req, res) => {
     const secretkey = process.env.JWT_SECRET
     const expires_in = 60 * 10 // 10 minutes
     const exp = Date.now() + expires_in * 1000
-    const tokenPayload = { userId: existingUser.ID, username, exp };
+    const tokenPayload = { userId: existingUser.ID, username };
     const token = jwt.sign({ tokenPayload, exp }, secretkey)
     res.json({ token_type: "Bearer", token, expires_in })
 

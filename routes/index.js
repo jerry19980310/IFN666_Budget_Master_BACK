@@ -12,7 +12,6 @@ const authorize = (req, res, next) => {
     // Retrieve token
     if (authorization && authorization.split(" ").length === 2) {
         token = authorization.split(" ")[1];
-        console.log("Token: ", token);
     } else {
         console.log("Unauthorized user");
         res.status(401).json({error: true, message: "Unauthorized"})
@@ -21,9 +20,10 @@ const authorize = (req, res, next) => {
     // Verify JWT and check expiration date
     try {
         const decoded = jwt.verify(token, secretKey);
-        if (decoded.exp < Date.now) {
-        console.log("Token has expired");
-        return;
+        if (decoded.exp < Date.now()) {
+          console.log("Token has expired");
+          res.status(401).json({error: true, message: "Token has expired"})
+          return;
         }
         // Permit user to advance to route
         next();
@@ -42,19 +42,33 @@ router.get('/', function(req, res, next) {
 
 router.use(bodyParser.json());
 
-router.get("/api/category/:User_ID", async (req, res) => {
+router.get("/api/category", authorize, async (req, res) => {
   try {
     const categories = await req.db
       .from("category")
-      .select("ID", "name")
-      .where("user_id", req.params.User_ID);
+      .select("ID", "name");
+      // .where("user_id", req.params.User_ID);
+      console.log(categories);
     res.json({ error: false, categories });
   } catch (error) {
     res.json({ error: true, message: error });
   }
 });
 
-router.get("/api/transaction/:User_ID", async (req, res) => {
+router.get("/api/transaction/summary/:User_ID", authorize, async (req, res) => {
+  try {
+    const summary = await req.db
+      .from("homepage")
+      .select( "user_id", "category", "amount", "Year", "Month")
+      .where("user_id", req.params.User_ID);
+    res.json({ error: false, summary });
+  } catch (error) {
+    res.json({ error: true, message: error });
+  }
+});
+
+
+router.get("/api/transaction/:User_ID", authorize, async (req, res) => {
   try {
     const transactions = await req.db
       .from("transaction")
@@ -67,16 +81,16 @@ router.get("/api/transaction/:User_ID", async (req, res) => {
 });
 
 
-router.post('/api/category/create', authorize, async (req, res) => {
-  try {
-    const { name, user_id } = req.body;
-    await req.db.insert({ name, user_id }).into('category');;
-    res.status(201).json({ message: 'Data inserted successfully' });
-  } catch (error) {
-    console.error('Error inserting data:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// router.post('/api/category/create', authorize, async (req, res) => {
+//   try {
+//     const { name, user_id } = req.body;
+//     await req.db.insert({ name, user_id }).into('category');;
+//     res.status(201).json({ message: 'Data inserted successfully' });
+//   } catch (error) {
+//     console.error('Error inserting data:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 
 router.post('/api/transaction/create', authorize, async (req, res) => {
   try {
@@ -89,22 +103,22 @@ router.post('/api/transaction/create', authorize, async (req, res) => {
   }
 });
 
-router.put('/api/category/modify/:Category_ID', authorize, async (req, res) => {
+// router.put('/api/category/modify/:Category_ID', authorize, async (req, res) => {
 
-  const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
-    if (!existingCategory) {
-      return res.status(404).json({ error: 'Category not found' });
-    }
+//   const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
+//     if (!existingCategory) {
+//       return res.status(404).json({ error: 'Category not found' });
+//     }
 
-  try {
-    const { name } = req.body;
-    await req.db('category').where('id', req.params.Category_ID).update({name});
-    res.status(200).json({ message: 'Category name updated successfully' });
-  } catch (error) {
-    console.error('Error updating category name:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+//   try {
+//     const { name } = req.body;
+//     await req.db('category').where('id', req.params.Category_ID).update({name});
+//     res.status(200).json({ message: 'Category name updated successfully' });
+//   } catch (error) {
+//     console.error('Error updating category name:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 
 router.put('/api/transaction/modify/:Transaction_ID', authorize, async (req, res) => {
 
@@ -123,16 +137,16 @@ router.put('/api/transaction/modify/:Transaction_ID', authorize, async (req, res
   }
 });
 
-router.delete("/api/category/delete/:Category_ID", authorize, async (req, res) => {
+// router.delete("/api/category/delete/:Category_ID", authorize, async (req, res) => {
 
-  try {
-    await req.db('category').where('id', req.params.Category_ID).del();
-    res.status(200).json({ message: 'Category deleted successfully' });
-  } catch (error) {
-    console.error('Error updating category name:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+//   try {
+//     await req.db('category').where('id', req.params.Category_ID).del();
+//     res.status(200).json({ message: 'Category deleted successfully' });
+//   } catch (error) {
+//     console.error('Error updating category name:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 
 router.delete("/api/transaction/delete/:Transaction_ID", authorize, async (req, res) => {
 
