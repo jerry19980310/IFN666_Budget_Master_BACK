@@ -57,13 +57,18 @@ router.post("/login",  async (req, res) => {
     const existingUser = await req.db('user').where('username', username).first();
 
     if (!existingUser) {
-      return res.status(401).json({ error: 'User does not exist' });
+      return res.status(401).json({ 
+        error: true,
+        message:  'User does not exist' 
+      });
     }
 
     const match = await bcrypt.compare(password, existingUser.Hash);
 
     if (!match) {
-      return res.status(401).json({ error: 'Password is incorrect' });
+      return res.status(401).json({ 
+        error: true,
+        message:  'Password is incorrect' });
     }
 
     const secretkey = process.env.JWT_SECRET

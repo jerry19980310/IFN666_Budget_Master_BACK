@@ -20,6 +20,8 @@ const authorize = (req, res, next) => {
     // Verify JWT and check expiration date
     try {
         const decoded = jwt.verify(token, secretKey);
+        console.log(decoded.exp);
+        console.log(Date.now());
         if (decoded.exp < Date.now()) {
           console.log("Token has expired");
           res.status(401).json({error: true, message: "Token has expired"})
