@@ -48,7 +48,6 @@ router.get("/api/category", authorize, async (req, res) => {
       .from("category")
       .select("ID", "name");
       // .where("user_id", req.params.User_ID);
-      console.log(categories);
     res.json({ error: false, categories });
   } catch (error) {
     res.json({ error: true, message: error });
