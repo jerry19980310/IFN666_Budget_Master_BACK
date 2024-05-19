@@ -91,14 +91,17 @@ router.get("/api/transaction/:User_ID", authorize, async (req, res) => {
 //   }
 // });
 
+
 router.post('/api/transaction/create', authorize, async (req, res) => {
   try {
     const { amount, note, user_id, date, category } = req.body;
     await req.db.insert({ amount, note, user_id, date, category }).into('transaction');;
-    res.status(201).json({ message: 'Data inserted successfully' });
+    res.status(201).json({ error: false,
+       message: 'Data inserted successfully' });
   } catch (error) {
     console.error('Error inserting data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: true,
+      message: 'Internal server error' });
   }
 });
 
@@ -123,16 +126,16 @@ router.put('/api/transaction/modify/:Transaction_ID', authorize, async (req, res
 
   const existingTransaction = await req.db('transaction').where('id', req.params.Transaction_ID).first();
     if (!existingTransaction) {
-      return res.status(404).json({ error: 'Category not found' });
+      return res.status(404).json({ error: true, message: 'Category not found' });
     }
 
   try {
     const { amount, note, date, category } = req.body;
     await req.db('transaction').where('id', req.params.Transaction_ID).update({amount, note, date, category});
-    res.status(200).json({ message: 'Transaction updated successfully' });
+    res.status(200).json({ error: false, message: 'Transaction updated successfully' });
   } catch (error) {
     console.error('Error updating transaction:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: true, message: 'Internal server error' });
   }
 });
 
@@ -151,10 +154,10 @@ router.delete("/api/transaction/delete/:Transaction_ID", authorize, async (req, 
 
   try {
     await req.db('transaction').where('id', req.params.Transaction_ID).del();
-    res.status(200).json({ message: 'Category deleted successfully' });
+    res.status(200).json({ error: false, message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Error updating category name:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: true, message: 'Internal server error' });
   }
 });
 

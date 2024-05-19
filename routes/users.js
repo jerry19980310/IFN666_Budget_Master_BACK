@@ -34,7 +34,7 @@ router.post("/register",  async (req, res) => {
 
   try {
     await req.db('user').insert({ username, hash });
-    res.status(201).json({ success: true, message: "User created" });
+    res.status(201).json({ success: true, message: "User created succeddfully." });
   } catch (error) {
     console.error('Error inserting user:', error);
     res.status(500).json({ 
@@ -72,7 +72,7 @@ router.post("/login",  async (req, res) => {
     }
 
     const secretkey = process.env.JWT_SECRET
-    const expires_in = 60 * 10 // 10 minutes
+    const expires_in = 60 * 60 * 1 // 10 minutes
     const exp = Date.now() + expires_in * 1000
     const tokenPayload = { userId: existingUser.ID, username };
     const token = jwt.sign({ tokenPayload, exp }, secretkey)
