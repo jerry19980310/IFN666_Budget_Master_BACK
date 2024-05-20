@@ -42,12 +42,13 @@ router.get('/', function(req, res, next) {
 
 router.use(bodyParser.json());
 
-router.get("/api/category", authorize, async (req, res) => {
+router.get("/api/category/:User_ID", authorize, async (req, res) => {
   try {
     const categories = await req.db
       .from("category")
-      .select("ID", "name");
-      // .where("user_id", req.params.User_ID);
+      .select("ID", "name")
+      .where("user_id", req.params.User_ID)
+      .orderBy([{ column: 'ID', order: 'asc'}]);
     res.json({ error: false, categories });
   } catch (error) {
     res.json({ error: true, message: error });
@@ -59,7 +60,8 @@ router.get("/api/transaction/summary/:User_ID", authorize, async (req, res) => {
     const summary = await req.db
       .from("homepage")
       .select( "user_id", "category", "amount", "Year", "Month")
-      .where("user_id", req.params.User_ID);
+      .where("user_id", req.params.User_ID)
+      .orderBy([{ column: 'Year', order: 'desc'}, { column: 'Month', order: 'desc' }]);
     res.json({ error: false, summary });
   } catch (error) {
     res.json({ error: true, message: error });
@@ -72,7 +74,8 @@ router.get("/api/transaction/:User_ID", authorize, async (req, res) => {
     const transactions = await req.db
       .from("transaction")
       .select("ID",  "amount", "note", "user_id", "date", "category")
-      .where("user_id", req.params.User_ID);
+      .where("user_id", req.params.User_ID)
+      .orderBy([{ column: 'date', order: 'desc'}, { column: 'ID', order: 'asc' }]);
     res.json({ error: false, transactions });
   } catch (error) {
     res.json({ error: true, message: error });
@@ -80,16 +83,33 @@ router.get("/api/transaction/:User_ID", authorize, async (req, res) => {
 });
 
 
-// router.post('/api/category/create', authorize, async (req, res) => {
-//   try {
-//     const { name, user_id } = req.body;
-//     await req.db.insert({ name, user_id }).into('category');;
-//     res.status(201).json({ message: 'Data inserted successfully' });
-//   } catch (error) {
-//     console.error('Error inserting data:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
+router.post('/api/category/create', authorize, async (req, res) => {
+  try {
+    const { name, user_id } = req.body;
+    await req.db.insert({ name, user_id }).into('category');;
+    res.status(201).json({ message: 'Data inserted successfully' });
+  } catch (error) {
+    console.error('Error inserting data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/api/categories/initial', authorize, async (req, res) => {
+  try {
+        const { user_id } = req.body;
+        console.log(user_id);
+        const name = ['Food', 'Transport', 'Household', 'Health', 'Education', 'Gifts', 'Work out', 'Others']
+        for (let i = 0; i < name.length; i++) {
+          await req.db.insert({ name: name[i], user_id }).into('category');
+        }
+        res.status(201).json({ message: 'Data inserted successfully' });
+      } catch (error) {
+        console.error('Error inserting data:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+});
+
+
 
 
 router.post('/api/transaction/create', authorize, async (req, res) => {
@@ -105,22 +125,22 @@ router.post('/api/transaction/create', authorize, async (req, res) => {
   }
 });
 
-// router.put('/api/category/modify/:Category_ID', authorize, async (req, res) => {
+router.put('/api/category/modify/:Category_ID', authorize, async (req, res) => {
 
-//   const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
-//     if (!existingCategory) {
-//       return res.status(404).json({ error: 'Category not found' });
-//     }
+  const existingCategory = await req.db('category').where('id', req.params.Category_ID).first();
+    if (!existingCategory) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
 
-//   try {
-//     const { name } = req.body;
-//     await req.db('category').where('id', req.params.Category_ID).update({name});
-//     res.status(200).json({ message: 'Category name updated successfully' });
-//   } catch (error) {
-//     console.error('Error updating category name:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
+  try {
+    const { name } = req.body;
+    await req.db('category').where('id', req.params.Category_ID).update({name});
+    res.status(200).json({ message: 'Category name updated successfully' });
+  } catch (error) {
+    console.error('Error updating category name:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 router.put('/api/transaction/modify/:Transaction_ID', authorize, async (req, res) => {
 
@@ -139,16 +159,16 @@ router.put('/api/transaction/modify/:Transaction_ID', authorize, async (req, res
   }
 });
 
-// router.delete("/api/category/delete/:Category_ID", authorize, async (req, res) => {
+router.delete("/api/category/delete/:Category_ID", authorize, async (req, res) => {
 
-//   try {
-//     await req.db('category').where('id', req.params.Category_ID).del();
-//     res.status(200).json({ message: 'Category deleted successfully' });
-//   } catch (error) {
-//     console.error('Error updating category name:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
+  try {
+    await req.db('category').where('id', req.params.Category_ID).del();
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Error updating category name:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 router.delete("/api/transaction/delete/:Transaction_ID", authorize, async (req, res) => {
 
