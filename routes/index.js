@@ -55,11 +55,24 @@ router.get("/api/category/:User_ID", authorize, async (req, res) => {
   }
 });
 
-router.get("/api/transaction/summary/:User_ID", authorize, async (req, res) => {
+router.get("/api/transaction/summarybyyearmonth/:User_ID", authorize, async (req, res) => {
   try {
     const summary = await req.db
-      .from("homepage")
-      .select( "user_id", "category", "amount", "Year", "Month")
+      .from("summaryYearMonth")
+      .select( "user_id", "amount", "year", "month")
+      .where("user_id", req.params.User_ID)
+      .orderBy([{ column: 'Year', order: 'desc'}, { column: 'Month', order: 'desc' }]);
+    res.json({ error: false, summary });
+  } catch (error) {
+    res.json({ error: true, message: error });
+  }
+});
+
+router.get("/api/transaction/summarybycategory/:User_ID", authorize, async (req, res) => {
+  try {
+    const summary = await req.db
+      .from("summarycategory")
+      .select( "user_id", "category", "amount", "year", "month")
       .where("user_id", req.params.User_ID)
       .orderBy([{ column: 'Year', order: 'desc'}, { column: 'Month', order: 'desc' }]);
     res.json({ error: false, summary });
