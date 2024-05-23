@@ -1,0 +1,102 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "IFN666 A3 API",
+    "description": "This is a simple Express API based on the World Cities Database. It supports basic city and province listings, along with filtering based on Country Code",
+    "version": "1.0.0",
+    "contact": {
+      "email": "your.email@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/api/category/User_ID": {
+      "get": {
+        "summary": "List cities and provinces",
+        "description": "Full listing of cities and their provinces for the database",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": ["true", "false"]
+                    },
+                    "category": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/city/{CountryCode}": {
+      "get": {
+        "summary": "List cities for given country.",
+        "description": "Listing of all information for each city for the selected country",
+        "parameters": [
+          {
+            "name": "CountryCode",
+            "in": "path",
+            "description": "Three letter Country Code used to filter queries.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "NZL"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": ["true", "false"]
+                    },
+                    "cities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "district": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
