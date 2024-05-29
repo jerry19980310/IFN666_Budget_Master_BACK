@@ -51,13 +51,13 @@ router.post("/login",  async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({
         error: true,
-        message: "Request body incomplete - email and password needed"
+        message: "Request body incomplete - user name and password needed"
       });
     }
     const existingUser = await req.db('user').where('username', username).first();
 
     if (!existingUser) {
-      return res.status(401).json({ 
+      return res.status(400).json({ 
         error: true,
         message:  'User does not exist' 
       });
@@ -66,13 +66,13 @@ router.post("/login",  async (req, res) => {
     const match = await bcrypt.compare(password, existingUser.Hash);
 
     if (!match) {
-      return res.status(401).json({ 
+      return res.status(400).json({ 
         error: true,
         message:  'Password is incorrect' });
     }
 
     const secretkey = process.env.JWT_SECRET
-    const expires_in = 60 * 60 * 24  // 10 minutes
+    const expires_in = 60 * 60 * 1  // 10 minutes
     const exp = Date.now() + expires_in * 1000
     const tokenPayload = { userId: existingUser.ID, username };
     const token = jwt.sign({ tokenPayload, exp }, secretkey)
