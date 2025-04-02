@@ -20,7 +20,7 @@ The Budget Master backend API is documented using [Swagger UI](https://swagger.i
 ![Swagger UI Overview](https://raw.githubusercontent.com/jerry19980310/Project-Demo/refs/heads/main/BudgetMaster/Swagger.png)
 
 ### How to Use
-1. Start the backend server and open your browser at: [localhost](http://localhost:3000/docs)).
+1. Start the backend server and open your browser at: [http://localhost:3000/docs](http://localhost:3000/docs))
 
 2. View the API documentation and test endpoints directly in Swagger UI.
 
