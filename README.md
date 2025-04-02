@@ -13,6 +13,17 @@ The purpose of Budget Master is to provide users with an easy-to-use platform to
 - **Spending Patterns**: Analyze spending habits with visual graphs and charts.
 - **Detailed Reports**: Generate comprehensive reports to gain insights into your financial health.
 
+## API Documentation
+
+The Budget Master backend API is documented using [Swagger UI](https://swagger.io/).
+
+![Swagger UI Overview](https://raw.githubusercontent.com/jerry19980310/Project-Demo/refs/heads/main/BudgetMaster/Swagger.png)
+
+### How to Use
+1. Start the backend server and open your browser at: [localhost](http://localhost:3000/docs)).
+
+2. View the API documentation and test endpoints directly in Swagger UI.
+
 ## Dependencies and Installation
 
 ### Prerequisites
